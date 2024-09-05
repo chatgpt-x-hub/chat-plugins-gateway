@@ -15,13 +15,17 @@ import {
   pluginRequestPayloadSchema,
 } from '@lobehub/chat-plugin-sdk';
 import { OPENAPI_REQUEST_BODY_KEY } from '@lobehub/chat-plugin-sdk/openapi';
+import { HttpsProxyAgent } from 'https-proxy-agent';
 // @ts-ignore
 import SwaggerClient from 'swagger-client';
+
+import { isLocalOrPrivateNetwork } from './ip';
+
+const fetch = require('node-fetch');
 
 export const DEFAULT_PLUGINS_INDEX_URL = 'https://chat-plugins.lobehub.com';
 
 type IValidator = (schema: Schema, value: any) => { errors?: any; valid: boolean };
-
 export interface GatewayOptions {
   Validator?: IValidator;
   defaultPluginSettings?: Record<string, Record<string, any>>;
@@ -98,6 +102,11 @@ export class Gateway {
     if (!manifest) {
       const marketIndexUrl = indexUrl ?? this.pluginIndexUrl;
       // ==========  3. 获取插件市场索引 ========== //
+      if (isLocalOrPrivateNetwork(marketIndexUrl))
+        return this.createErrorResponse(PluginErrorType.PluginMarketIndexInvalid, {
+          indexUrl: marketIndexUrl,
+          message: '[gateway] plugin market index is local or private network',
+        });
 
       let marketIndex: LobeChatPluginsMarketIndex | undefined;
       try {
@@ -166,6 +175,11 @@ export class Gateway {
 
       // 获取插件的 manifest
       try {
+        if (isLocalOrPrivateNetwork(pluginMeta.manifest))
+          return this.createErrorResponse(PluginErrorType.PluginManifestInvalid, {
+            manifestUrl: pluginMeta.manifest,
+            message: '[plugin] plugin manifest is local or private network',
+          });
         const pluginRes = await fetch(pluginMeta.manifest);
         manifest = (await pluginRes.json()) as LobeChatPluginManifest;
       } catch (error) {
@@ -250,12 +264,30 @@ export class Gateway {
         api,
         message: '[plugin] missing api url',
       });
+    if (isLocalOrPrivateNetwork(api.url))
+      return this.createErrorResponse(PluginErrorType.PluginApiParamsError, {
+        api,
+        message: '[plugin] api url is local or private network',
+      });
+    console.log(`[plugin] api url: ${api.url}`, args, settings);
 
-    const response = await fetch(api.url, {
+    let options = {
       body: args,
+      // dispatcher: agent,
       headers: createHeadersWithPluginSettings(settings),
       method: 'POST',
-    });
+    };
+
+    if (process.env.HTTP_PROXY) {
+      console.log(`[plugin] use http proxy: ${process.env.HTTP_PROXY}`);
+      const proxy = new HttpsProxyAgent(process.env.HTTP_PROXY);
+      options = {
+        ...options,
+        agent: proxy,
+      };
+    }
+
+    const response = await fetch(api.url, options);
 
     // ==========  9. 发送请求 ========== //
 
