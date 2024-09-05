@@ -42,7 +42,7 @@ Plugin Gateway Service for Lobe Chat and Lobe Web
 - [⌨️ Local Development](#️-local-development)
 - [🤝 Contributing](#-contributing)
 - [🔗 Links](#-links)
-- [docker](#docker)
+- [🧩 docker](#-docker)
 
 ####
 
@@ -255,7 +255,7 @@ This project is [MIT](./LICENSE) licensed.
 
 <!-- LINK GROUP -->
 
-## docker
+## 🧩 docker
 
 ```
 docker build -t wpjscc/chat-plugins-gateway . -f Dockerfile
