@@ -278,7 +278,20 @@ export class Gateway {
       method: 'POST',
     };
 
-    if (process.env.HTTP_PROXY) {
+    let use_proxy = false;
+    let proxy_str = [];
+
+    if (process.env.PROXY_STR) {
+      proxy_str = process.env.PROXY_STR.split(',');
+    }
+
+    proxy_str.forEach((element) => {
+      if (api.url.includes(element)) {
+        use_proxy = true;
+      }
+    });
+
+    if (process.env.HTTP_PROXY && use_proxy) {
       console.log(`[plugin] use http proxy: ${process.env.HTTP_PROXY}`);
       const proxy = new HttpsProxyAgent(process.env.HTTP_PROXY);
       options = {
