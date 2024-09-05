@@ -310,7 +310,7 @@ export class Gateway {
 
     const data = await response.text();
 
-    // console.log(`[${identifier}]`, args, `result:`, JSON.stringify(data).slice(0, 1000));
+    console.log(`[${api.url}]`, args, `result:`, JSON.stringify(data).slice(0, 1000));
 
     return this.createSuccessResponse(data);
   }
