@@ -42,6 +42,7 @@ Plugin Gateway Service for Lobe Chat and Lobe Web
 - [⌨️ Local Development](#️-local-development)
 - [🤝 Contributing](#-contributing)
 - [🔗 Links](#-links)
+- [docker](#docker)
 
 ####
 
@@ -70,7 +71,7 @@ The gateway service fetches lobe plugins index from the [LobeChat Plugins](https
 
 ### POST Plugin Gateway
 
-> **Note**\
+> \[!NOTE]\
 > **POST** `/api/v1/runner`\
 > Interface to communicate with the LobeChat plugin. This interface describes how to use the LobeChat plugin gateway API to send requests and get responses
 
@@ -253,6 +254,33 @@ Copyright © 2023 [LobeHub][profile-link]. <br />
 This project is [MIT](./LICENSE) licensed.
 
 <!-- LINK GROUP -->
+
+## docker
+
+```
+docker build -t wpjscc/chat-plugins-gateway . -f Dockerfile
+
+docker push wpjscc/chat-plugins-gateway
+```
+
+```
+docker run \
+  -p 3011:3000 \
+  --name chat-plugins-gateway \
+  wpjscc/chat-plugins-gateway \
+  node dist/server.js
+```
+
+with proxy
+
+```
+docker run \
+  -p 3011:3000 \
+  --name chat-plugins-gateway \
+  -e HTTP_PROXY=http://192.168.1.9:7890 \
+  wpjscc/chat-plugins-gateway \
+  node dist/server.js
+```
 
 [🤯-🧩-lobehub-link]: https://github.com/lobehub/lobe-chat-plugins
 [🤯-🧩-lobehub-shield]: https://img.shields.io/badge/%F0%9F%A4%AF%20%26%20%F0%9F%A7%A9%20LobeHub-Plugin-95f3d9?labelColor=black&style=flat-square
